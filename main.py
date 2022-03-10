@@ -2,7 +2,6 @@ import pygame
 import sys
 import math
 
-### force brutes to getting some percentage base heat maps less than 5 on the window
 
 #initalizes game 
 class game():
@@ -11,29 +10,14 @@ class game():
         self.WIDTH = 640
         self.HEIGHT = 640
         self.screen = pygame.display.set_mode((self.WIDTH,self.HEIGHT))
-        self.objs = {"AMZN":50,"GOOG":35,"SHOP":15,"tt":5}  
+        #self.objs = {"AMZN":50,"GOOG":35,"SHOP":15,"tt":5}  
+        self.objs = [50,35,15]  
         self.font = pygame.font.Font("freesansbold.ttf",32)
-        
-    def algo(self):
-        self.area = self.WIDTH * self.HEIGHT
-        self.totalMarketCap = 0
-        self.objPercentage = {}
-        for i,k in self.objs.items():
-            self.totalMarketCap += k
-        for i,k in self.objs.items():
-            percentage = k/self.totalMarketCap
-            self.objPercentage.update({i:percentage})
-        #print(self.objPercentage)
-        self.x = 0
-        self.objs3 = {}
-        if len(self.objs) <= 5:
-            for i, k in self.objPercentage.items():
-                length = k * self.WIDTH
-                self.objs3.update({length:self.HEIGHT})
-  
+        self.tiles = HeatTiles(self.screen,self.objs)
+
     #main gameloop
     def run(self):
-        self.algo()
+        
         while(True):
             l = 0
             for event in pygame.event.get():
@@ -42,13 +26,41 @@ class game():
             self.screen.fill((0,0,0))
 
             #renders through a bunch of force brute to get heat maps on the window
-            tt= 0
-            temp = 0
-            for i,j in self.objs3.items():
-                pygame.draw.rect(self.screen,(255,tt+10,0),(self.x+temp,0,i,j))
-                temp += i
-                tt+=50
+            self.tiles.draw()
             pygame.display.flip()
+
+#Heat Tiles Initialize
+class HeatTiles():
+    def __init__(self,screen,marketCaps):
+        self.marketCap = sum(marketCaps)
+        self.screen = screen
+        self.objPercentage = []
+        self.objs = []
+        
+        x  = 0
+        for i in marketCaps:
+            percentage = i/self.marketCap
+            self.objPercentage.append(percentage)
+            map = HeatTile(self.screen,(0,255,0),x,0,50,50)
+            self.objs.append(map)
+            x +=50
+
+    def draw(self):
+        for i in self.objs:
+            i.draw()
+
+#individaul Heat Tile
+class HeatTile():
+    def __init__(self,screen,color,x,y,w,h):
+        self.screen = screen
+        self.color = color
+        self.x = x
+        self.y = y
+        self.w = w
+        self.h = h
+
+    def draw(self):
+        pygame.draw.rect(self.screen,self.color,(self.x,self.y,self.w,self.h))
 
 if __name__ == "__main__":
     game = game()
